@@ -30,6 +30,9 @@ inputs:
   change-request:
     description: 'The customized inputs to create change with the requested details.'
     required: true
+  child-workflow-id:
+    description: 'The workflow_id to execute from ServiceNow after the change is approved in ServiceNow.'
+    required: false
 branding:
   icon: 'refresh-ccw'
   color: 'green'

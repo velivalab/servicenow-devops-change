@@ -10,6 +10,7 @@ const main = async() => {
     const username = core.getInput('devops-integration-user-name', { required: true });
     const passwd = core.getInput('devops-integration-user-password', { required: true });
     const jobname = core.getInput('job-name', { required: true });
+    const childWorkflowId = core.getInput('child-workflow-id', { required: false });
 
     let changeRequestDetailsStr = core.getInput('change-request', { required: true });
     let githubContextStr = core.getInput('context-github', { required: true });
@@ -24,12 +25,16 @@ const main = async() => {
         passwd,
         jobname,
         githubContextStr,
-        changeRequestDetailsStr
+        changeRequestDetailsStr,
+        childWorkflowId
       });
     } catch (err) {
       status = false;
       core.setFailed(err.message);
     }
+
+    if (childWorkflowId)
+      status = false; //do not poll to check for change approval status
 
     if (status) {
       let timeout = parseInt(core.getInput('timeout') || 100);

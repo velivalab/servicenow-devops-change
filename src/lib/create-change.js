@@ -8,7 +8,8 @@ async function createChange({
   passwd,
   jobname,
   githubContextStr,
-  changeRequestDetailsStr
+  changeRequestDetailsStr,
+  childWorkflowId
 }) {
    
     console.log('Calling Change Control API to create change....');
@@ -45,8 +46,10 @@ async function createChange({
             'workflow': `${githubContext.workflow}`,
             'repository': `${githubContext.repository}`,
             'branchName': `${githubContext.ref_name}`,
-            'changeRequestDetails': changeRequestDetails
+            'changeRequestDetails': changeRequestDetails,
+            'childWorkflowId': childWorkflowId
         };
+        console.log('prepared payload is:: '+JSON.stringify(payload));
     } catch (err) {
         console.log(`Error occured with message ${err}`);
         throw new Error("Exception preparing payload");
