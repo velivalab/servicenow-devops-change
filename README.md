@@ -1,6 +1,6 @@
 # ServiceNow DevOps Change GitHub Action
 
-This custom action needs to be added at step level in a job to create change in ServiceNow instance.
+This custom action needs to be added at step level in a job to create change in ServiceNow instance. Using this custom action in parallel jobs is not supported.
 
 # Usage
 ## Step 1: Prepare values for setting up your secrets for Actions
@@ -17,14 +17,18 @@ Create secrets called
 - `SN_INSTANCE_URL` your ServiceNow instance URL, for example **https://test.service-now.com**
 - `SN_ORCHESTRATION_TOOL_ID` only the **sys_id** is required for the GitHub tool created in your ServiceNow instance
 
-## Step 3: Configure the GitHub Action if need to adapt for your needs or workflows
+## Step 3: Identify upstream job that must complete successfully before the job using this custom action will run
+Use needs to configure the identified upstream job. See [test.yml](.github/workflows/test.yml) for usage.
+
+## Step 4: Configure the GitHub Action if need to adapt for your needs or workflows
 ```yaml
 deploy:
     name: Deploy
+    needs: <upstream job>
     runs-on: ubuntu-latest
     steps:     
       - name: ServiceNow Change
-        uses: velivalab/servicenow-devops-change@master
+        uses: ServiceNow/servicenow-devops-change@v1.38.0
         with:
           devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
           devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
@@ -35,6 +39,9 @@ deploy:
           change-request: '{"setCloseCode":"true","attributes":{"short_description":"Automated Software Deployment","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
           interval: '100'
           timeout: '3600'
+          changeCreationTimeOut: '3600'
+          abortOnChangeCreationFailure: true
+          abortOnChangeStepTimeout: true
 ```
 The values for secrets should be setup in Step 1. Secrets should be created in Step 2.
 
@@ -75,6 +82,18 @@ The time in seconds to wait between trying the API. The default value is 100 sec
 ### `timeout`
 
 The max. time in seconds to wait until the action should fail. The default value is 3600 seconds.
+
+### `changeCreationTimeOut`
+
+The maximum time in seconds to wait for change creation. The default value is 3600 seconds.
+
+### `abortOnChangeCreationFailure`
+
+This value will be used to resume or abort the pipeline if the change is not created within the mentioned time period (changeCreationTimeOut). The default value is true.
+
+### `abortOnChangeStepTimeout`
+
+This value will be used to resume or abort the pipeline if the change step is not completed within the mentioned time period (timeout). The default value is true.
 
 ## Outputs
 No outputs produced.

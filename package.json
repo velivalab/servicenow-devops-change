@@ -9,7 +9,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com:velivalab/servicenow-devops-change.git"
+        "url": "git+ssh://git@github.com:ServiceNow/servicenow-devops-change.git"
     },
     "keywords": [
         "devops",
@@ -19,12 +19,12 @@
     "author": "ServiceNow",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/velivalab/servicenow-devops-change/issues"
+        "url": "https://github.com/ServiceNow/servicenow-devops-change/issues"
     },
-    "homepage": "https://github.com/velivalab/servicenow-devops-change#readme",
+    "homepage": "https://github.com/ServiceNow/servicenow-devops-change#readme",
     "dependencies": {
-        "@actions/core": "^1.9.1",
+        "@actions/core": "^1.8.2",
         "axios": "^0.24.0",
-        "follow-redirects": "^1.15.1"
+        "follow-redirects": "^1.15.0"
     }
 }

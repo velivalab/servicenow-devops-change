@@ -9,19 +9,30 @@ async function createChange({
   jobname,
   githubContextStr,
   changeRequestDetailsStr,
-  childWorkflowId
+  changeCreationTimeOut,
+  deploymentGateStr
 }) {
    
     console.log('Calling Change Control API to create change....');
     
     let changeRequestDetails;
+    let deploymentGateDetails;
     let attempts = 0;
+    changeCreationTimeOut = changeCreationTimeOut * 1000;
 
     try {
       changeRequestDetails = JSON.parse(changeRequestDetailsStr);
     } catch (e) {
         console.log(`Error occured with message ${e}`);
         throw new Error("Failed parsing changeRequestDetails");
+    }
+
+    try {
+        if (deploymentGateStr)
+            deploymentGateDetails = JSON.parse(deploymentGateStr);
+    } catch (e) {
+        console.log(`Error occured with message ${e}`);
+        throw new Error("Failed parsing deploymentGateDetails");
     }
 
     let githubContext;
@@ -46,16 +57,17 @@ async function createChange({
             'workflow': `${githubContext.workflow}`,
             'repository': `${githubContext.repository}`,
             'branchName': `${githubContext.ref_name}`,
-            'changeRequestDetails': changeRequestDetails,
-            'childWorkflowId': childWorkflowId
+            'changeRequestDetails': changeRequestDetails
         };
-        console.log('prepared payload is:: '+JSON.stringify(payload));
+        if (deploymentGateStr) {
+            payload.deploymentGateDetails = deploymentGateDetails;
+        }
     } catch (err) {
         console.log(`Error occured with message ${err}`);
         throw new Error("Exception preparing payload");
     }
 
-    const postendpoint = `${instanceUrl}/api/sn_devops/devops/orchestration/changeControl?toolId=${toolId}&toolType=github_server`;
+    const postendpoint = `${instanceUrl}/api/sn_devops/v1/devops/orchestration/changeControl?toolId=${toolId}&toolType=github_server`;
     let response;
     let status = false;
 
@@ -70,11 +82,15 @@ async function createChange({
                 'Accept': 'application/json',
                 'Authorization': 'Basic ' + `${encodedToken}`
             };
-            let httpHeaders = { headers: defaultHeaders };
+            let httpHeaders = { headers: defaultHeaders,  timeout: changeCreationTimeOut };
             response = await axios.post(postendpoint, JSON.stringify(payload), httpHeaders);
             status = true;
             break;
         } catch (err) {
+            if (err.code === 'ECONNABORTED') {
+                throw new Error(`change creation timeout after ${err.config.timeout}s`);
+            }
+
             if (err.message.includes('ECONNREFUSED') || err.message.includes('ENOTFOUND')) {
                 throw new Error('Invalid ServiceNow Instance URL. Please correct the URL and try again.');
             }
@@ -110,7 +126,7 @@ async function createChange({
                 if (errMsg.indexOf('callbackURL') == -1)
                     throw new Error(errMsg);
                 else if (attempts >= 3) {
-                    errMsg = 'Task/Step Execution not created for this job/stage. Please check Inbound Events processing details and ServiceNow logs for more details.';
+                    errMsg = 'Task/Step Execution not created in ServiceNow DevOps for this job/stage ' + jobname + '. Please check Inbound Events processing details in ServiceNow instance and ServiceNow logs for more details.';
                     throw new Error(errMsg);
                 }
             }

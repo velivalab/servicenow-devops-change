@@ -30,8 +30,20 @@ inputs:
   change-request:
     description: 'The customized inputs to create change with the requested details.'
     required: true
-  child-workflow-id:
-    description: 'The workflow_id to execute from ServiceNow after the change is approved in ServiceNow.'
+  changeCreationTimeOut:
+    description: 'The max. time in seconds to wait until change created.'
+    required: false
+    default: '3600'
+  abortOnChangeCreationFailure:
+    description: 'This value will be used to resume or abort the pipeline if the change is not created within the mentioned time period in changeCreationTimeOut. '
+    required: false
+    default: true
+  abortOnChangeStepTimeout:
+    description: 'This value will be used to resume or abort the pipeline after a timeout has occurred in case a change step is still in a pending state.'
+    required: false
+    default: true
+  deployment-gate:
+    description: 'The customized inputs to process deployment gate job related change.'
     required: false
 branding:
   icon: 'refresh-ccw'
