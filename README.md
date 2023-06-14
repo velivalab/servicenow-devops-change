@@ -24,11 +24,11 @@ Use needs to configure the identified upstream job. See [test.yml](.github/workf
 ```yaml
 deploy:
     name: Deploy
-    needs: <upstream job>
+    needs: <upstream job name>
     runs-on: ubuntu-latest
     steps:     
       - name: ServiceNow Change
-        uses: ServiceNow/servicenow-devops-change@v1.38.0
+        uses: velivalab/servicenow-devops-change@depgate
         with:
           devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
           devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
